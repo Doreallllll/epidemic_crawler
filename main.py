@@ -4,34 +4,75 @@ import storer
 import viewer
 import os
 import webbrowser
+import threading
 
 from consts import KIND_WORLD, KIND_CHINA
 
 target_url = 'https://ncov.dxy.cn/ncovh5/view/pneumonia'
 
 vr = viewer.Viewer()
+cr = crawler.Crawler(target_url)
+sr = storer.Storer()
 
 def start_crawl():
-    cr = crawler.Crawler(target_url)
-    sr = storer.Storer()
     # 每次爬取前清空数据库，保证数据完整
     sr.reset_data()
+    kinds = [KIND_WORLD, KIND_CHINA]
+    
+    # 采集近一日数据
+    threads = []
+    for kind in kinds:
+        t = threading.Thread(target=_crawl_last_day_data, args=(kind, ))
+        threads.append(t)
+        t.start()
+    # 等待所有线程任务结束
+    for t in threads:
+        t.join()
+    
+    # 采集历史数据（基于近一日数据进行爬取，所以不能和近一日爬取进行并发）
+    threads = []
+    for kind in kinds:
+        t = threading.Thread(target=_crawl_all_data, args=(kind, ))
+        threads.append(t)
+        t.start()
+    # 等待所有线程任务结束
+    for t in threads:
+        t.join()
+    
+        
+    # # 采集世界各国近一日数据
+    # last_day_data_of_world = cr.crawl_last_day_data_of_world()
+    # sr.set_last_day_data(KIND_WORLD, last_day_data_of_world)
+    
+    # # # 采集中国各省近一日数据
+    # last_day_data_of_china = cr.crawl_last_day_data_of_china()
+    # sr.set_last_day_data(KIND_CHINA, last_day_data_of_china)
+    
+    # # 采集世界各国历史数据
+    # all_data_of_world = cr.crawl_all_data_of_world(sr.get_last_day_data(KIND_WORLD))
+    # sr.set_all_data(KIND_WORLD, all_data_of_world)
+    
+    # # 采集中国各省历史数据
+    # all_data_of_china = cr.crawl_all_data_of_china(sr.get_last_day_data(KIND_CHINA))
+    # sr.set_all_data(KIND_CHINA, all_data_of_china)
+    return
 
-    # 采集世界各国近一日数据
-    last_day_data_of_world = cr.crawl_last_day_data_of_world()
-    sr.set_last_day_data(KIND_WORLD, last_day_data_of_world)
-    
-    # # 采集中国各省近一日数据
-    last_day_data_of_china = cr.crawl_last_day_data_of_china()
-    sr.set_last_day_data(KIND_CHINA, last_day_data_of_china)
-    
-    # 采集世界各国历史数据
-    all_data_of_world = cr.crawl_all_data_of_world(sr.get_last_day_data(KIND_WORLD))
-    sr.set_all_data(KIND_WORLD, all_data_of_world)
-    
-    # 采集中国各省历史数据
-    all_data_of_china = cr.crawl_all_data_of_china(sr.get_last_day_data(KIND_CHINA))
-    sr.set_all_data(KIND_CHINA, all_data_of_china)
+ # 采集近一日数据
+def _crawl_last_day_data(kind):
+    if kind == KIND_WORLD:
+        last_day_data = cr.crawl_last_day_data_of_world()
+    elif kind == KIND_CHINA:
+        last_day_data = cr.crawl_last_day_data_of_china()
+    sr.set_last_day_data(kind, last_day_data)
+    return
+
+# 采集历史数据
+def _crawl_all_data(kind):
+    if kind == KIND_WORLD:
+        all_data = cr.crawl_all_data_of_world(sr.get_last_day_data(KIND_WORLD))
+    elif kind == KIND_CHINA:
+        all_data = cr.crawl_all_data_of_china(sr.get_last_day_data(KIND_CHINA))
+    sr.set_all_data(KIND_CHINA, all_data)
     return
 
 def load_view(_id):
