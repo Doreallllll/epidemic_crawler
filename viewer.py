@@ -206,36 +206,37 @@ class Viewer(BaseViewer):
         # 热力图生成
         HeatMap(base_data).add_to(m).show
         # 热力图保存
-        m.save(os.path.join('heapmap', file_name))
-        return
+        p = os.path.join('heapmap', file_name)
+        m.save(p)
+        return p
         
     def all_cured_of_china_by_heatmap(self):
         """历史国内治愈人数热力图"""
         kind = KIND_CHINA
         data = VIEWER_DATA_HANDLER.get_last_day_data(kind)
-        self._build_heatmap(kind, data, 'cured_count','all_cured_of_china.html')
-        return        
+        fp = self._build_heatmap(kind, data, 'cured_count','all_cured_of_china.html')
+        return fp  
     
     def all_cured_of_world_by_heatmap(self):
         """历史世界治愈人数热力图"""
         kind = KIND_WORLD
         data = VIEWER_DATA_HANDLER.get_last_day_data(kind)
-        self._build_heatmap(kind, data, 'cured_count','all_cured_of_world.html')
-        return
+        fp = self._build_heatmap(kind, data, 'cured_count','all_cured_of_world.html')
+        return fp
     
     def all_confirmed_of_china_by_heatmap(self):
         """历史国内确诊人数热力图"""
         kind = KIND_CHINA
         data = VIEWER_DATA_HANDLER.get_last_day_data(kind)
-        self._build_heatmap(kind, data, 'confirmed_count','all_confirmed_of_china.html')
-        return    
+        fp = self._build_heatmap(kind, data, 'confirmed_count','all_confirmed_of_china.html')
+        return fp
     
     def all_confirmed_of_world_by_heatmap(self):
         """历史世界确诊人数热力图"""
         kind = KIND_WORLD
         data = VIEWER_DATA_HANDLER.get_last_day_data(kind)
-        self._build_heatmap(kind, data, 'confirmed_count','all_confirmed_of_world.html')
-        return
+        fp = self._build_heatmap(kind, data, 'confirmed_count','all_confirmed_of_world.html')
+        return fp
     
     def _build_multiple_horizontal_histogram(self, title, nums, xlabels):
         """绘制多类型水平直方图

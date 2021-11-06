@@ -18,10 +18,18 @@ class Storer():
         """
         client = pymongo.MongoClient(f'mongodb://%s:%s/' % (self.MG_IP, self.MG_Port))
         self.db = client[self.MG_DBName]
+
         return
     
     def _get_col(self, k):
         return self.db[k]
+    
+    def reset_data(self):
+        """清空原有数据"""
+        for col in ['all_data_china', 'all_data_world', 'last_day_data_china', 'last_day_data_world']:
+            print("# 清理集合%s历史数据..." % col)
+            self._get_col(col).drop()
+        return
     
     def save_file(self, data, path):
         """数据持久化
@@ -119,7 +127,6 @@ class DataHandler(Storer):
         data = self.get_last_day_data(KIND_CHINA)
         data_map = {}
         for d in data:
-            print(d)
             data_map[d.get('provinceShortName')] = {
                 'confirmedCount': d.get('confirmedCount'),
                 'curedCount': d.get('curedCount'),
