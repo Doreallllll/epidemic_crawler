@@ -72,7 +72,7 @@ def _crawl_all_data(kind):
         all_data = cr.crawl_all_data_of_world(sr.get_last_day_data(KIND_WORLD))
     elif kind == KIND_CHINA:
         all_data = cr.crawl_all_data_of_china(sr.get_last_day_data(KIND_CHINA))
-    sr.set_all_data(KIND_CHINA, all_data)
+    sr.set_all_data(kind, all_data)
     return
 
 def load_view(_id):
